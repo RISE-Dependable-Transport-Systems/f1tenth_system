@@ -19,3 +19,6 @@
 [submodule "slam_toolbox"]
 	path = slam_toolbox
 	url = https://github.com/SteveMacenski/slam_toolbox.git
+[submodule "sllidar"]
+	path = sllidar
+	url = git@github.com:rickaha/sllidar.git

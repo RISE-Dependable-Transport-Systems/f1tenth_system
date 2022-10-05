@@ -1,7 +1,3 @@
-[submodule "vesc"]
-	path = vesc
-	url = https://github.com/f1tenth/vesc.git
-	branch = ros2
 [submodule "ackermann_mux"]
 	path = ackermann_mux
 	url = https://github.com/f1tenth/ackermann_mux.git
@@ -10,15 +6,9 @@
 	path = teleop_tools
 	url = https://github.com/f1tenth/teleop_tools.git
 	branch = foxy-devel
-[submodule "sllidar_ros2"]
-	path = sllidar_ros2
-	url = https://github.com/Slamtec/sllidar_ros2.git
 [submodule "navigation2"]
 	path = navigation2
 	url = https://github.com/ros-planning/navigation2.git
 [submodule "slam_toolbox"]
 	path = slam_toolbox
 	url = https://github.com/SteveMacenski/slam_toolbox.git
-[submodule "sllidar"]
-	path = sllidar
-	url = git@github.com:rickaha/sllidar.git

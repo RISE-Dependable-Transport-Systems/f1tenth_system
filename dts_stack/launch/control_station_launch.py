@@ -45,6 +45,7 @@ def generate_launch_description():
     ekf_config = LaunchConfiguration('ekf_config')
     params_file = LaunchConfiguration('params_file')
     use_sim_time = LaunchConfiguration('use_sim_time')
+    slam_params_file = LaunchConfiguration('slam_params_file')
     
     # args that can be set from the command line or a default will be used
     robot_state_publisher_la = DeclareLaunchArgument(
@@ -57,8 +58,11 @@ def generate_launch_description():
         'ekf_config', default_value=os.path.join(dts_dir, 'config/ekf.yaml'),
         description='Full path to ekf config file')    
     nav2_la = DeclareLaunchArgument(
-        'params_file', default_value=os.path.join(dts_dir, 'config/nav2_params_modified.yaml'),
+        'params_file', default_value=os.path.join(dts_dir, 'config/nav2_params_modified_humble.yaml'),
         description='Full path to nav2 params file')
+    slam_la = DeclareLaunchArgument(
+        'slam_params_file', default_value=os.path.join(dts_dir, 'config/mapper_params_online_async_modified_humble.yaml'),
+        description='Full path to slam toolbox params file')
     use_sim_time_la = DeclareLaunchArgument(
         'use_sim_time', default_value='False',
         description='Use simulation/Gazebo clock')
@@ -68,6 +72,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource([
             os.path.join(slam_toolbox_dir, 'launch/online_async_launch.py')]),
         launch_arguments={
+            'slam_params_file': slam_params_file,
             'use_sim_time': use_sim_time
             }.items()
     )
@@ -135,6 +140,7 @@ def generate_launch_description():
     ld.add_action(robot_localization_la)
     ld.add_action(use_sim_time_la)    
     ld.add_action(nav2_la)
+    ld.add_action(slam_la)
     ld.add_action(use_sim_time_la)
     
     # start nodes

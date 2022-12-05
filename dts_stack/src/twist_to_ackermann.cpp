@@ -39,7 +39,7 @@ class TwistToAckermann : public rclcpp::Node
   
     void topic_callback(const geometry_msgs::msg::Twist::SharedPtr twi_msg) const
     {
-      RCLCPP_INFO(this->get_logger(), "\nLinear:\n x: %f""\nAngular:\n z: %f", twi_msg->linear.x, twi_msg->angular.z);
+      //RCLCPP_INFO(this->get_logger(), "\nLinear:\n x: %f""\nAngular:\n z: %f", twi_msg->linear.x, twi_msg->angular.z);
       
       auto ack_msg = ackermann_msgs::msg::AckermannDriveStamped();
       ack_msg.header.stamp.sec = duration_cast<seconds>(system_clock::now().time_since_epoch()).count();

@@ -16,7 +16,7 @@ ekf_filter_node:
         publish_acceleration: true
 
 # Whether to broadcast the transformation over the /tf topic. Defaultsto true if unspecified. If true, the state estimation node will publish the transform from the frame specified by the world_frame parameter to its child. If the world_frame is the same as the map_frame it will publish the transform from the map_frame to the odom_frame and if the world_frame is the same as the odom_frame it will publish the transform from the odom_frame to the base_link_frame. 
-        publish_tf: true
+        publish_tf: false
 
 # 1. Set the map_frame, odom_frame, and base_link frames to the appropriate frame names for your system.
 #     1a. If your system does not have a map_frame, just remove it, and make sure "world_frame" is set to the value of odom_frame.

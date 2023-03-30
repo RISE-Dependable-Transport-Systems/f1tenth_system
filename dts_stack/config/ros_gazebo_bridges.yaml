@@ -73,3 +73,4 @@
   direction: ROS_TO_GZ  # Default "BIDIRECTIONAL" - Bridge both directions
                             # "GZ_TO_ROS" - Bridge Ignition topic to ROS
                             # "ROS_TO_GZ" - Bridge ROS topic to Ignition
+                            

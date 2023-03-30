@@ -4,6 +4,7 @@ Drivers onboard f1tenth race cars. This branch is under development for migratio
 
 ### Pre-requisites:
 * [Install ROS 2](https://docs.ros.org/en/humble/Installation.html)
+* [Install Gazebo](https://gazebosim.org/docs/fortress/install_ubuntu)
 * Install Navigation2
 
     ```sudo apt install ros-<ros2_distro>-navigation2 ros-<distro>-nav2-bringup```
@@ -52,6 +53,14 @@ On Sony Interactive Entertainment Wireless Controller, the LB button is the dead
 
 1. `f1tenth_stack`: maintains the bringup launch and all parameter files
 2. `dts_stack`: maintains control station launch and rover launch, URDF file, all parameter files and a node to convert twist messages to ackermann messages.
+
+## To run Gazebo
+
+1. ros2 launch dts_stack gazebo_rviz.launch.py frame_prefix:=robot/ use_sim_time:=true
+2. ros2 run ros_gz_bridge parameter_bridge --ros-args -p config_file:=/home/ubuntu/src/f1tenth_ws/src/f1tenth_system/dts_stack/config/ros_gazebo_bridges.yaml
+3. ros2 run teleop_twist_keyboard teleop_twist_keyboard
+4. or use joypad
+5. In rviz, set TF prefix to robot and fixed frame to robot/odom
 
 ## Nodes launched by rover launch
 

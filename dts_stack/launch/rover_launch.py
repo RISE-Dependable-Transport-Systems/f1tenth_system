@@ -6,10 +6,10 @@ from ament_index_python import get_package_share_directory
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, GroupAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, Command
-from launch_ros.actions import Node
+from launch_ros.actions import Node, SetRemap
 
 def generate_launch_description():
     # get the directories
@@ -23,6 +23,9 @@ def generate_launch_description():
     ekf_config = LaunchConfiguration('ekf_config')
     params_file = LaunchConfiguration('params_file')
     use_sim_time = LaunchConfiguration('use_sim_time')
+    
+    lidar_frame_id = LaunchConfiguration('lidar_frame_id')
+    lidar_scan_topic = LaunchConfiguration('lidar_scan_topic')
         
     # args that can be set from the command line or a default will be used
     joy_la = DeclareLaunchArgument(
@@ -45,12 +48,22 @@ def generate_launch_description():
         description='Full path to nav2 params file')
     use_sim_time_la = DeclareLaunchArgument(
         'use_sim_time', default_value='false',
-        description='Use simulation/Gazebo clock')    
+        description='Use simulation/Gazebo clock')
+    lidar_frame_id_la = DeclareLaunchArgument('lidar_frame_id', default_value='laser')
+    lidar_scan_topic_la = DeclareLaunchArgument('lidar_scan_topic', default_value='/scan_lidar')
     
-    # include launch files
-    sllidar_s1_launch_file = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(sllidar_dir, 'launch/sllidar_s1_launch.py'))
+    
+    # include launch files    
+    sllidar_s1_launch_include = GroupAction(
+        actions=[
+            SetRemap(src='/scan',dst=lidar_scan_topic),
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(os.path.join(sllidar_dir, 'launch/sllidar_s1_launch.py')),
+                launch_arguments = {
+                    'frame_id' : lidar_frame_id
+                    }.items(),
+            )
+        ]
     )
     slam_toolbox_start = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
@@ -133,7 +146,7 @@ def generate_launch_description():
         executable='twist_to_ackermann',
         name='twist_to_ackermann',
         output='screen'
-    )   
+    )       
     
     # create launch description
     ld = LaunchDescription()
@@ -145,10 +158,12 @@ def generate_launch_description():
     ld.add_action(use_sim_time_la)    
     ld.add_action(nav2_la)
     ld.add_action(vesc_la)
-    ld.add_action(mux_la)
+    ld.add_action(mux_la)  
+    ld.add_action(lidar_frame_id_la)
+    ld.add_action(lidar_scan_topic_la)
     
     # start nodes
-    ld.add_action(sllidar_s1_launch_file)   
+    ld.add_action(sllidar_s1_launch_include)    
     ld.add_action(joy_teleop_node)
     ld.add_action(joint_state_publisher_node)
     ld.add_action(robot_state_publisher_node)

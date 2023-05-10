@@ -1,6 +1,8 @@
 joy:
   ros__parameters:
-    device_name: Sony Interactive Entertainment Wireless Controller
+    # device_name: Sony Interactive Entertainment Wireless Controller
+    # device_name: Wireless Controller
+    device_id: 0
     deadzone: 0.01
     autorepeat_rate: 20.0
     coalesce_interval: 0.01

@@ -36,3 +36,7 @@
 
 # py
 *.pyc
+
+# Visual studio files
+*.vscode
+**/__pycache__/

@@ -6,19 +6,16 @@ Drivers onboard f1tenth race cars. This branch is under development for migratio
 * [Install ROS 2](https://index.ros.org/doc/ros2/Installation/Foxy/)
 * Install Navigation2
 
-    ```sudo apt install ros-<ros2_distro>-navigation2 ros-<distro>-nav2-bringup```
-
+  ``sudo apt install ros-foxy-navigation2 ros-foxy-nav2-bringup``
 * Install SLAM Toolbox
 
-    ```sudo apt install ros-<ros2-distro>-slam-toolbox```
-    
+  ``sudo apt install ros-foxy-slam-toolbox``
 * Install Joint State Publisher
 
-    ```sudo apt install ros-<ros2-distro>-joint-state-publisher```
-    
+  ``sudo apt install ros-foxy-joint-state-publisher``
 * Install Robot Localization
 
-    ```sudo apt install ros-<ros2-distro>-robot-localization```
+  ``sudo apt install ros-foxy-robot-localization``
 
 ## Deadman's switch
 On Sony Interactive Entertainment Wireless Controller, the LB button is the deadman's switch for teleop, and the RB button is the deadman's switch for navigation. You can also remap buttons. See how on the readthedocs documentation.
@@ -55,28 +52,28 @@ On Sony Interactive Entertainment Wireless Controller, the LB button is the dead
 
 ## Nodes launched by rover launch
 
-1. joy
-2. joy_teleop
-3. ackermann_to_vesc_node
-4. vesc_to_odom_node
-5. vesc_driver_node
-6. ackermann_mux
-7. sllidar_node
+1. ackermann_to_vesc_node
+2. vesc_to_odom_node
+3. vesc_driver_node
+4. ackermann_mux
+5. sllidar_node
+6. twist_to_ackermann
 
 ## Nodes launched by control station launch
 
-1. robot_state_publisher
-2. joint_state_publisher
+1. joy
+2. joy_teleop
 3. rviz2
-4. ekf_filter_node
-5. twist_to_ackermann
-6. nav2_controller
-7. nav2_planner
-8. nav2_recoveries
-9. nav2_bt_navigator
-10. nav2_waypoint_follower
-11. nav2_lifecycle_manager
-12. slam_toolbox
+4. robot_state_publisher
+5. joint_state_publisher
+6. ekf_filter_node
+7. nav2_controller
+8. nav2_planner
+9. nav2_recoveries
+10. nav2_bt_navigator
+11. nav2_waypoint_follower
+12. nav2_lifecycle_manager
+13. slam_toolbox
 
 ## Parameters and topics for dependencies
 
@@ -143,6 +140,7 @@ On Sony Interactive Entertainment Wireless Controller, the LB button is the dead
    - publish_tf
 2. Publishes to:
    - odom
+   - battery_voltage
 3. Subscribes to:
    - sensors/core
    - sensors/servo_position_command

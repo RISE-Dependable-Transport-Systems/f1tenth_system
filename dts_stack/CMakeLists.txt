@@ -16,7 +16,10 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 # find dependencies
+find_package(gazebo REQUIRED)
 find_package(ament_cmake REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 find_package(xacro REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -27,14 +30,17 @@ find_package(ackermann_msgs REQUIRED)
 # find_package(<dependency> REQUIRED)
 
 add_executable(twist_to_ackermann src/twist_to_ackermann.cpp)
+add_executable(respawn_robot src/respawn_robot.cpp)
 ament_target_dependencies(twist_to_ackermann rclcpp geometry_msgs std_msgs ackermann_msgs)
+ament_target_dependencies(respawn_robot rclcpp std_msgs)
 
 install(TARGETS
   twist_to_ackermann
+  respawn_robot
   DESTINATION lib/${PROJECT_NAME})
 
 install(
-  DIRECTORY src launch config urdf rviz
+  DIRECTORY src launch config urdf rviz worlds behavior_trees
   DESTINATION share/${PROJECT_NAME}
 )
 

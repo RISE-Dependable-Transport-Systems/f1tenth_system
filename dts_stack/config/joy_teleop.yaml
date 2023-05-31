@@ -1,6 +1,8 @@
 joy:
   ros__parameters:
-    device_name: Sony Interactive Entertainment Wireless Controller
+    # device_name: Sony Interactive Entertainment Wireless Controller
+    # device_name: Wireless Controller
+    device_id: 0
     deadzone: 0.01
     autorepeat_rate: 20.0
     coalesce_interval: 0.01
@@ -38,9 +40,18 @@ joy_teleop:
 
     autonomous_control:
       type: topic
-      interface_type: std_msgs/msg/Int8
-      topic_name: /dev/null
+      interface_type: std_msgs/msg/Bool
+      topic_name: /allow_autonomous
       deadman_buttons: [5]
       message_value:
         data:
-          value: 0
+          value: false
+
+    respawn_robot:
+      type: topic
+      interface_type: std_msgs/msg/Bool
+      topic_name: /respawn_robot
+      deadman_buttons: [2]
+      message_value:
+        data:
+          value: false

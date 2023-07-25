@@ -17,7 +17,6 @@ def generate_launch_description():
     dts_dir = get_package_share_directory('dts_stack')
     sllidar_dir = get_package_share_directory('sllidar_ros2')
     slam_toolbox_dir = get_package_share_directory('slam_toolbox')
-    nav2_bringup_dir = get_package_share_directory('nav2_bringup')
     xacro_file = os.path.join(dts_dir, 'urdf', 'ackermannRobot', 'robot.urdf.xacro')
     robot_description_config = xacro.process_file(xacro_file)
     robot_desc = robot_description_config.toxml()
@@ -25,9 +24,7 @@ def generate_launch_description():
     # args that can be set from the command line
     ekf_config = LaunchConfiguration('ekf_config')
     params_file = LaunchConfiguration('params_file')
-    use_sim_time = LaunchConfiguration('use_sim_time')
-    default_bt_xml_filename = LaunchConfiguration('default_bt_xml_filename')
-    map_subscribe_transient_local = LaunchConfiguration('map_subscribe_transient_local')
+    use_sim_time = LaunchConfiguration('use_sim_time')    
     lidar_frame_id = LaunchConfiguration('lidar_frame_id')
     lidar_scan_topic = LaunchConfiguration('lidar_scan_topic')
         
@@ -53,12 +50,6 @@ def generate_launch_description():
     lidar_frame_id_la = DeclareLaunchArgument('lidar_frame_id', default_value='lidar_link')
     lidar_scan_topic_la = DeclareLaunchArgument('lidar_scan_topic', default_value='/scan_lidar')
     
-    
-    default_bt_xml_filename_la = DeclareLaunchArgument('default_bt_xml_filename', 
-                                                       default_value=os.path.join(dts_dir, 'config/navigate_w_replanning_and_recovery.xml'))
-    map_subscribe_transient_local_la = DeclareLaunchArgument('map_subscribe_transient_local', 
-                                                       default_value='true')
-
     # include launch files    
     sllidar_s1_launch_include = GroupAction(
         actions=[
@@ -81,12 +72,10 @@ def generate_launch_description():
     )
     nav2_start = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
-            os.path.join(nav2_bringup_dir, 'launch/navigation_launch.py')]),
+            os.path.join(dts_dir, 'launch/navigation_launch.py')]),
         launch_arguments={
             'params_file': params_file,
-            'use_sim_time': use_sim_time,
-            'default_bt_xml_filename': default_bt_xml_filename,
-            'map_subscribe_transient_local': map_subscribe_transient_local
+            'use_sim_time': use_sim_time
             }.items()
     )
     
@@ -163,9 +152,7 @@ def generate_launch_description():
     ld.add_action(use_sim_time_la)    
     ld.add_action(nav2_la)
     ld.add_action(vesc_la)
-    ld.add_action(mux_la)
-    ld.add_action(default_bt_xml_filename_la)
-    ld.add_action(map_subscribe_transient_local_la)    
+    ld.add_action(mux_la)  
     ld.add_action(lidar_frame_id_la)
     ld.add_action(lidar_scan_topic_la)
     

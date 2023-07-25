@@ -27,7 +27,7 @@ def generate_launch_description():
     mux_la = DeclareLaunchArgument(
         'mux_config', default_value=os.path.join(dts_dir, 'config/mux.yaml'),
         description='Full path to params file')
-    lidar_frame_id_la = DeclareLaunchArgument('lidar_frame_id', default_value='laser')
+    lidar_frame_id_la = DeclareLaunchArgument('lidar_frame_id', default_value='lidar_link')
     lidar_scan_topic_la = DeclareLaunchArgument('lidar_scan_topic', default_value='/scan_lidar')
     
     # include launch files    
@@ -66,8 +66,7 @@ def generate_launch_description():
         package='ackermann_mux',
         executable='ackermann_mux',
         name='ackermann_mux',
-        parameters=[LaunchConfiguration('mux_config')],
-        remappings=[('ackermann_cmd_out', 'ackermann_drive')]
+        parameters=[LaunchConfiguration('mux_config')]
     )    
     twist_to_ackermann_node = Node(
         package='dts_stack',

@@ -10,6 +10,7 @@ from launch.actions import IncludeLaunchDescription, GroupAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, Command
 from launch_ros.actions import Node, SetRemap
+import xacro
 
 def generate_launch_description():
     # get the directories
@@ -17,15 +18,16 @@ def generate_launch_description():
     sllidar_dir = get_package_share_directory('sllidar_ros2')
     slam_toolbox_dir = get_package_share_directory('slam_toolbox')
     nav2_bringup_dir = get_package_share_directory('nav2_bringup')
+    xacro_file = os.path.join(dts_dir, 'urdf', 'ackermannRobot', 'robot.urdf.xacro')
+    robot_description_config = xacro.process_file(xacro_file)
+    robot_desc = robot_description_config.toxml()
 
     # args that can be set from the command line
-    model = LaunchConfiguration('model')
     ekf_config = LaunchConfiguration('ekf_config')
     params_file = LaunchConfiguration('params_file')
     use_sim_time = LaunchConfiguration('use_sim_time')
     default_bt_xml_filename = LaunchConfiguration('default_bt_xml_filename')
     map_subscribe_transient_local = LaunchConfiguration('map_subscribe_transient_local')
-    
     lidar_frame_id = LaunchConfiguration('lidar_frame_id')
     lidar_scan_topic = LaunchConfiguration('lidar_scan_topic')
         
@@ -33,10 +35,7 @@ def generate_launch_description():
     joy_la = DeclareLaunchArgument(
         'joy_config', default_value=os.path.join(dts_dir, 'config/joy_teleop.yaml'),
         description='Full path to params file')
-    robot_state_publisher_la = DeclareLaunchArgument(
-        'model', default_value=os.path.join(dts_dir, 'urdf/box_car_camera.urdf'),
-        description='Full path to robot urdf file')
-    robot_localization_la = DeclareLaunchArgument(
+    ekf_la = DeclareLaunchArgument(
         'ekf_config', default_value=os.path.join(dts_dir, 'config/ekf.yaml'),
         description='Full path to ekf config file')        
     vesc_la = DeclareLaunchArgument(
@@ -51,7 +50,7 @@ def generate_launch_description():
     use_sim_time_la = DeclareLaunchArgument(
         'use_sim_time', default_value='false',
         description='Use simulation/Gazebo clock')
-    lidar_frame_id_la = DeclareLaunchArgument('lidar_frame_id', default_value='laser')
+    lidar_frame_id_la = DeclareLaunchArgument('lidar_frame_id', default_value='lidar_link')
     lidar_scan_topic_la = DeclareLaunchArgument('lidar_scan_topic', default_value='/scan_lidar')
     
     
@@ -120,15 +119,14 @@ def generate_launch_description():
         package='ackermann_mux',
         executable='ackermann_mux',
         name='ackermann_mux',
-        parameters=[LaunchConfiguration('mux_config')],
-        remappings=[('ackermann_cmd_out', 'ackermann_drive')]
+        parameters=[LaunchConfiguration('mux_config')]
     )    
     robot_state_publisher_node = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
         name='robot_state_publisher',
         parameters=[{
-            'robot_description': Command(['xacro ', model]),
+            'robot_description': robot_desc,
             'use_sim_time': use_sim_time,
         }]
     )
@@ -137,18 +135,17 @@ def generate_launch_description():
         executable='joint_state_publisher',
         name='joint_state_publisher',
         parameters=[{
+            'rate': 50,
             'use_sim_time': use_sim_time,
         }]
     )
-    robot_localization_node = Node(
+    ekf_filter_node = Node(
         package='robot_localization',
         executable='ekf_node',
         name='ekf_filter_node',
         output='screen',
-        parameters=[{
-            'ekf_config': ekf_config,
-            'use_sim_time': use_sim_time
-        }]
+        parameters=[ekf_config],
+        remappings=[('/odometry/filtered', '/ekf_odom')]
     )
     twist_to_ackermann_node = Node(
         package='dts_stack',
@@ -162,8 +159,7 @@ def generate_launch_description():
     
     # declare launch args
     ld.add_action(joy_la)
-    ld.add_action(robot_state_publisher_la)
-    ld.add_action(robot_localization_la)
+    ld.add_action(ekf_la)
     ld.add_action(use_sim_time_la)    
     ld.add_action(nav2_la)
     ld.add_action(vesc_la)
@@ -177,7 +173,7 @@ def generate_launch_description():
     ld.add_action(joy_teleop_node)
     ld.add_action(joint_state_publisher_node)
     ld.add_action(robot_state_publisher_node)
-    ld.add_action(robot_localization_node)
+    ld.add_action(ekf_filter_node)
     ld.add_action(ackermann_to_vesc_node)
     ld.add_action(vesc_to_odom_node)
     ld.add_action(vesc_driver_node)
@@ -185,8 +181,8 @@ def generate_launch_description():
     ld.add_action(twist_to_ackermann_node)     
     
     # start launch files   
-    ld.add_action(sllidar_s1_launch_include)  
     ld.add_action(slam_toolbox_start)  
+    ld.add_action(sllidar_s1_launch_include)  
     ld.add_action(nav2_start)
     
     return ld

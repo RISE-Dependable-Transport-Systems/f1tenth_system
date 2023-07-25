@@ -32,12 +32,16 @@ from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, LaunchConfiguration
 from launch_ros.actions import Node
+import xacro
 
 def generate_launch_description():
     # get the directories
     dts_dir = get_package_share_directory('dts_stack')
     nav2_bringup_dir = get_package_share_directory('nav2_bringup')
     slam_toolbox_dir = get_package_share_directory('slam_toolbox')
+    xacro_file = os.path.join(dts_dir, 'urdf', 'ackermannRobot', 'robot.urdf.xacro')
+    robot_description_config = xacro.process_file(xacro_file)
+    robot_desc = robot_description_config.toxml()
     
     # args that can be set from the command line
     model = LaunchConfiguration('model')
@@ -56,13 +60,10 @@ def generate_launch_description():
                                                        default_value=os.path.join(dts_dir, 'config/navigate_w_replanning_and_recovery.xml'))
     map_subscribe_transient_local_la = DeclareLaunchArgument('map_subscribe_transient_local', 
                                                        default_value='true')
-    robot_state_publisher_la = DeclareLaunchArgument(
-        'model', default_value=os.path.join(dts_dir, 'urdf/box_car_camera.urdf'),
-        description='Full path to robot urdf file')
     rviz_la = DeclareLaunchArgument(
         'rviz_config', default_value=os.path.join(dts_dir, 'rviz/rviz_display_config.rviz'),
         description='Full path to rviz display config file')
-    robot_localization_la = DeclareLaunchArgument(
+    ekf_la = DeclareLaunchArgument(
         'ekf_config', default_value=os.path.join(dts_dir, 'config/ekf.yaml'),
         description='Full path to ekf config file')     
     nav2_la = DeclareLaunchArgument(
@@ -110,7 +111,7 @@ def generate_launch_description():
         executable='robot_state_publisher',
         name='robot_state_publisher',
         parameters=[{
-            'robot_description': Command(['xacro ', model]),
+            'robot_description': robot_desc,
             'use_sim_time': use_sim_time,
         }]
     )
@@ -133,15 +134,13 @@ def generate_launch_description():
             'use_sim_time': use_sim_time,
         }]
     )
-    robot_localization_node = Node(
+    ekf_filter_node = Node(
         package='robot_localization',
         executable='ekf_node',
         name='ekf_filter_node',
         output='screen',
-        parameters=[{
-            'ekf_config': ekf_config,
-            'use_sim_time': use_sim_time
-        }]
+        parameters=[ekf_config],
+        remappings=[('/odometry/filtered', '/ekf_odom')]
     )
     
     # create launch description
@@ -151,9 +150,8 @@ def generate_launch_description():
     ld.add_action(joy_la)
     ld.add_action(default_bt_xml_filename_la)
     ld.add_action(map_subscribe_transient_local_la)
-    ld.add_action(robot_state_publisher_la)
     ld.add_action(rviz_la)
-    ld.add_action(robot_localization_la)
+    ld.add_action(ekf_la)
     ld.add_action(use_sim_time_la)    
     ld.add_action(nav2_la)
     
@@ -163,7 +161,7 @@ def generate_launch_description():
     ld.add_action(robot_state_publisher_node)
     ld.add_action(joint_state_publisher_node)
     ld.add_action(rviz_node)
-    ld.add_action(robot_localization_node)
+    ld.add_action(ekf_filter_node)
     
     # start launch files
     ld.add_action(slam_toolbox_start) 

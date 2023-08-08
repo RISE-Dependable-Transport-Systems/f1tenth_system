@@ -32,12 +32,16 @@ from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, LaunchConfiguration
 from launch_ros.actions import Node
+import xacro
 
 def generate_launch_description():
     # get the directories
     dts_dir = get_package_share_directory('dts_stack')
     nav2_bringup_dir = get_package_share_directory('nav2_bringup')
     slam_toolbox_dir = get_package_share_directory('slam_toolbox')
+    xacro_file = os.path.join(dts_dir, 'urdf', 'ackermannRobot', 'robot.urdf.xacro')
+    robot_description_config = xacro.process_file(xacro_file)
+    robot_desc = robot_description_config.toxml()
     
     # args that can be set from the command line
     model = LaunchConfiguration('model')
@@ -45,17 +49,23 @@ def generate_launch_description():
     ekf_config = LaunchConfiguration('ekf_config')
     params_file = LaunchConfiguration('params_file')
     use_sim_time = LaunchConfiguration('use_sim_time')
+    default_bt_xml_filename = LaunchConfiguration('default_bt_xml_filename')
+    map_subscribe_transient_local = LaunchConfiguration('map_subscribe_transient_local')
     
     # args that can be set from the command line or a default will be used
-    robot_state_publisher_la = DeclareLaunchArgument(
-        'model', default_value=os.path.join(dts_dir, 'urdf/box_car.urdf'),
-        description='Full path to robot urdf file')
+    joy_la = DeclareLaunchArgument(
+        'joy_config', default_value=os.path.join(dts_dir, 'config/joy_teleop.yaml'),
+        description='Full path to params file')
+    default_bt_xml_filename_la = DeclareLaunchArgument('default_bt_xml_filename', 
+                                                       default_value=os.path.join(dts_dir, 'config/navigate_w_replanning_and_recovery.xml'))
+    map_subscribe_transient_local_la = DeclareLaunchArgument('map_subscribe_transient_local', 
+                                                       default_value='true')
     rviz_la = DeclareLaunchArgument(
         'rviz_config', default_value=os.path.join(dts_dir, 'rviz/rviz_display_config.rviz'),
         description='Full path to rviz display config file')
-    robot_localization_la = DeclareLaunchArgument(
+    ekf_la = DeclareLaunchArgument(
         'ekf_config', default_value=os.path.join(dts_dir, 'config/ekf.yaml'),
-        description='Full path to ekf config file')    
+        description='Full path to ekf config file')     
     nav2_la = DeclareLaunchArgument(
         'params_file', default_value=os.path.join(dts_dir, 'config/nav2_params_modified.yaml'),
         description='Full path to nav2 params file')
@@ -68,6 +78,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource([
             os.path.join(slam_toolbox_dir, 'launch/online_async_launch.py')]),
         launch_arguments={
+            'slam_params_file': params_file,
             'use_sim_time': use_sim_time
             }.items()
     )
@@ -76,17 +87,31 @@ def generate_launch_description():
             os.path.join(nav2_bringup_dir, 'launch/navigation_launch.py')]),
         launch_arguments={
             'params_file': params_file,
-            'use_sim_time': use_sim_time
+            'use_sim_time': use_sim_time,
+            'default_bt_xml_filename': default_bt_xml_filename,
+            'map_subscribe_transient_local': map_subscribe_transient_local
             }.items()
     )
 
     # start nodes and use args to set parameters
+    joy_node = Node(
+        package='joy',
+        executable='joy_node',
+        name='joy',
+        parameters=[LaunchConfiguration('joy_config')]
+    ) 
+    joy_teleop_node = Node(
+        package='joy_teleop',
+        executable='joy_teleop',
+        name='joy_teleop',
+        parameters=[LaunchConfiguration('joy_config')]
+    )
     robot_state_publisher_node = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
         name='robot_state_publisher',
         parameters=[{
-            'robot_description': Command(['xacro ', model]),
+            'robot_description': robot_desc,
             'use_sim_time': use_sim_time,
         }]
     )
@@ -109,40 +134,34 @@ def generate_launch_description():
             'use_sim_time': use_sim_time,
         }]
     )
-    robot_localization_node = Node(
+    ekf_filter_node = Node(
         package='robot_localization',
         executable='ekf_node',
         name='ekf_filter_node',
         output='screen',
-        parameters=[{
-            'ekf_config': ekf_config,
-            'use_sim_time': use_sim_time
-        }]
+        parameters=[ekf_config],
+        remappings=[('/odometry/filtered', '/ekf_odom')]
     )
-    twist_to_ackermann_node = Node(
-        package='dts_stack',
-        executable='twist_to_ackermann',
-        name='twist_to_ackermann',
-        output='screen'
-    )    
     
     # create launch description
     ld = LaunchDescription()
     
     # declare launch args
-    ld.add_action(robot_state_publisher_la)
+    ld.add_action(joy_la)
+    ld.add_action(default_bt_xml_filename_la)
+    ld.add_action(map_subscribe_transient_local_la)
     ld.add_action(rviz_la)
-    ld.add_action(robot_localization_la)
+    ld.add_action(ekf_la)
     ld.add_action(use_sim_time_la)    
     ld.add_action(nav2_la)
-    ld.add_action(use_sim_time_la)
     
     # start nodes
+    ld.add_action(joy_node) 
+    ld.add_action(joy_teleop_node)
     ld.add_action(robot_state_publisher_node)
     ld.add_action(joint_state_publisher_node)
     ld.add_action(rviz_node)
-    ld.add_action(robot_localization_node)
-    ld.add_action(twist_to_ackermann_node)    
+    ld.add_action(ekf_filter_node)
     
     # start launch files
     ld.add_action(slam_toolbox_start) 

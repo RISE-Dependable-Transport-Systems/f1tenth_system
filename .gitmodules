@@ -13,4 +13,4 @@
 [submodule "vesc"]
 	path = vesc
 	url = git@github.com:RISE-Dependable-Transport-Systems/vesc.git
-	branch = ros2
+	branch = foxy

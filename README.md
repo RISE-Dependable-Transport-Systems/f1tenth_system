@@ -1,31 +1,65 @@
-# f1tenth_system
+# Autonomous RC car with ROS2
 
-Drivers onboard f1tenth race cars. This branch is under development for migration to ROS2. See the [documentation of F1TENTH](https://f1tenth.readthedocs.io/en/foxy_test/getting_started/firmware/index.html) on how to get started.
+Implementation of an autonomous RC car with ROS2 and heavily based on f1tenth_system. See the [documentation of F1TENTH](https://f1tenth.readthedocs.io/en/foxy_test/getting_started/firmware/index.html) on how to get started.
+
+### Demo with a [Jetson Xavier NX Developer Kit](https://developer.nvidia.com/embedded/learn/get-started-jetson-xavier-nx-devkit):
+
+https://github.com/RISE-Dependable-Transport-Systems/f1tenth_system/assets/58977950/d4a99786-3d3f-45d4-9e94-6f831fedba7d
 
 ### Pre-requisites:
+
 * [Install ROS 2](https://index.ros.org/doc/ros2/Installation/Foxy/)
-* Install Navigation2
-
-  ``sudo apt install ros-foxy-navigation2 ros-foxy-nav2-bringup``
-* Install SLAM Toolbox
-
-  ``sudo apt install ros-foxy-slam-toolbox``
+* Install SLAM Toolbox & Navigation2
+  ```
+  sudo apt install ros-foxy-slam-toolbox ros-foxy-navigation2 ros-foxy-nav2-bringup
+  ```
 * Install Joint State Publisher
-
-  ``sudo apt install ros-foxy-joint-state-publisher``
+  ```
+  sudo apt install ros-foxy-joint-state-publisher
+  ```
 * Install Robot Localization
+  ```
+  sudo apt install ros-foxy-robot-localization
+  ```
 
-  ``sudo apt install ros-foxy-robot-localization``
+### Installation:
+
+* Copy source
+  ```
+  mkdir src && cd src
+  git clone https://github.com/RISE-Dependable-Transport-Systems/f1tenth_system.git -b foxy-devel --recurse-submodules
+  ```
+* Build
+  ```
+  cd .. && source /opt/ros/foxy/setup.bash
+  colcon build --symlink-install
+  ```
+
+### Launch:
+
+* On RC car:
+  ```
+  source /opt/ros/foxy/setup.bash && source install/setup.bash
+  ros2 launch dts_stack rover_standalone.py
+  ```
+* On Control station:
+  ```
+  source /opt/ros/foxy/setup.bash && source install/setup.bash
+  ros2 launch dts_stack control_station_bare_minimum.py
+  ```
 
 ## Deadman's switch
+
 On Sony Interactive Entertainment Wireless Controller, the LB button is the deadman's switch for teleop, and the RB button is the deadman's switch for navigation. You can also remap buttons. See how on the readthedocs documentation.
 
 ## Topics
 
 ### Topics that the driver stack subscribe to
+
 - `/drive`: Topic for autonomous navigation, uses `AckermannDriveStamped` messages.
 
 ### Sensor topics published by the driver stack
+
 - `/scan`: Topic for `LaserScan` messages.
 - `/odom`: Topic for `Odometry` messages.
 - `/sensors/imu/raw`: Topic for `Imu` messages.
@@ -43,6 +77,7 @@ On Sony Interactive Entertainment Wireless Controller, the LB button is the dead
 8. nav2 [https://github.com/ros-planning/navigation2/tree/foxy-devel](https://github.com/ros-planning/navigation2/tree/foxy-devel). This is a ROS 2 navigation library.
 9. joint_state_publisher [https://index.ros.org/p/joint_state_publisher/#foxy](https://index.ros.org/p/joint_state_publisher/#foxy). Package for publishing sensor_msgs/msg/JointState messages for a robot described with URDF.
 10. robot_localization [https://index.ros.org/p/robot_localization/#foxy](https://index.ros.org/p/robot_localization/#foxy). Package of nonlinear state estimation nodes.
+
 <!-- 7. rosbridge_suite [https://index.ros.org/p/rosbridge_suite/#foxy-overview](https://index.ros.org/p/rosbridge_suite/#foxy-overview) This is a package that allows for websocket connection in ROS 2. -->
 
 ## Package in this repo
@@ -50,7 +85,7 @@ On Sony Interactive Entertainment Wireless Controller, the LB button is the dead
 1. `f1tenth_stack`: maintains the bringup launch and all parameter files
 2. `dts_stack`: maintains control station launch and rover launch, URDF file, all parameter files and a node to convert twist messages to ackermann messages.
 
-## Nodes launched by rover launch
+## Nodes launched by rover_launch.py
 
 1. ackermann_to_vesc_node
 2. vesc_to_odom_node
@@ -59,7 +94,7 @@ On Sony Interactive Entertainment Wireless Controller, the LB button is the dead
 5. sllidar_node
 6. twist_to_ackermann
 
-## Nodes launched by control station launch
+## Nodes launched by control_station_launch.py
 
 1. joy
 2. joy_teleop
@@ -75,6 +110,31 @@ On Sony Interactive Entertainment Wireless Controller, the LB button is the dead
 12. nav2_lifecycle_manager
 13. slam_toolbox
 
+## Nodes launched by rover_standalone.py
+
+1. joy_teleop
+2. joint_state_publisher
+3. robot_state_publisher
+4. ekf_filter_node
+5. ackermann_to_vesc_node
+6. vesc_to_odom_node
+7. vesc_driver_node
+8. ackermann_mux
+9. sllidar_node
+10. twist_to_ackermann
+11. nav2_controller
+12. nav2_planner
+13. nav2_recoveries
+14. nav2_bt_navigator
+15. nav2_waypoint_follower
+16. nav2_lifecycle_manager
+17. slam_toolbox
+
+## Nodes launched by control_station_bare_minimum.py
+
+1. joy
+2. rviz2
+
 ## Parameters and topics for dependencies
 
 ### twist_to_ackermann
@@ -83,7 +143,7 @@ On Sony Interactive Entertainment Wireless Controller, the LB button is the dead
    - drive
 2. Subscribes to:
    - cmd_vel
-   
+
 ### slam_toolbox
 
 1. Publishes to:

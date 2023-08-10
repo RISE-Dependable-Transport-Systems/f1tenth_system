@@ -64,13 +64,12 @@ On Sony Interactive Entertainment Wireless Controller, the LB button is the dead
 
 ## Nodes launched by rover launch
 
-1. joy
-2. joy_teleop
-3. ackermann_to_vesc_node
-4. vesc_to_odom_node
-5. vesc_driver_node
-6. ackermann_mux
-7. sllidar_node
+1. joy_teleop
+2. ackermann_to_vesc_node
+3. vesc_to_odom_node
+4. vesc_driver_node
+5. ackermann_mux
+6. sllidar_node
 
 ## Nodes launched by control station launch
 

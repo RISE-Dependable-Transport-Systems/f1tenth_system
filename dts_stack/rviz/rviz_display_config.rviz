@@ -30,6 +30,7 @@ Visualization Manager:
       Enabled: true
       Name: RobotModel
       Visual Enabled: true
+      TF Prefix: /robot
     - Class: rviz_default_plugins/TF
       Enabled: true
       Name: TF
@@ -40,7 +41,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: base_link
+    Fixed Frame: robot/odom
     Frame Rate: 30
   Name: root
   Tools:

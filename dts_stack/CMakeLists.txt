@@ -34,7 +34,7 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME})
 
 install(
-  DIRECTORY src launch config urdf rviz
+  DIRECTORY src launch config urdf rviz worlds
   DESTINATION share/${PROJECT_NAME}
 )
 

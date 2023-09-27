@@ -21,7 +21,7 @@ def generate_launch_description():
     
     # args that can be set from the command line or a default will be used
     robot_state_publisher_la = DeclareLaunchArgument(
-        'model', default_value=os.path.join(dts_dir, 'urdf/ackermannRobot/robot.urdf'),
+        'model', default_value=os.path.join(dts_dir, 'urdf/ackermannRobot/robot.urdf.xacro'),
         description='Full path to robot urdf file')
     rviz_la = DeclareLaunchArgument(
         'rviz_config', default_value=os.path.join(dts_dir, 'rviz/rviz_display_config.rviz'),
@@ -58,7 +58,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource([
             os.path.join(get_package_share_directory('ros_ign_gazebo'), 'launch', 'ign_gazebo.launch.py')]),
         launch_arguments={
-            'ign_args': '/home/ubuntu/src/f1tenth_ws/src/f1tenth_system/dts_stack/worlds/car_world.sdf'}.items()
+            'gz_args': '-r ' +  os.path.join(dts_dir, 'worlds/car_world.sdf')}.items()
     )
 
     spawn_entity = Node(package='ros_ign_gazebo', executable='create',
